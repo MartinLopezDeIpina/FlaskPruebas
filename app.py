@@ -1,11 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 from routes import init_routes
 
 from config import Config
 from database import db
-from models import Persona
 
 app = Flask(__name__)
 app.config.from_object(Config)
