@@ -97,6 +97,7 @@ def init_routes(app):
         # Commit the changes to store the RelacionesNodo objects in the database
         db.session.commit()
 
+    """
     @app.route('/add_csv')
     def store_tree_from_csv():
         file_path = os.path.join(app.static_folder, 'conocimientos.csv')
@@ -117,6 +118,7 @@ def init_routes(app):
 
                     parent = last_node_at_depth.get(i - 1)
 
+
                     nodo = NodoArbol(nombre=node)
                     #nodo = NodoArbol.query.order_by(-NodoArbol.nombre).first()
                     db.session.add(nodo)
@@ -124,13 +126,13 @@ def init_routes(app):
 
                     # If the node is not the root node, create a relationship with its parent
                     if parent:
-                        parent_nodo = NodoArbol.query.filter_by(nombre=parent).first()
-                        relacion = RelacionesNodo(ascendente_id=parent_nodo.nodoID, descendente_id=nodo.nodoID)
+                        relacion = RelacionesNodo(ascendente_id=parent.nodoID, descendente_id=nodo.nodoID)
                         db.session.add(relacion)
                         db.session.commit()
 
                     # Update the last node at the current depth level
-                    last_node_at_depth[i] = node
+                    last_node_at_depth[i] = nodo
+                    """
 
     @app.route('/delete')
     def delete_tree():
@@ -145,3 +147,39 @@ def init_routes(app):
 
         db.session.commit()
         return 'Tree deleted'
+
+
+    @app.route('/add_csv')
+    def store_tree_from_csv():
+        file_path = os.path.join(app.static_folder, 'conocimientos.csv')
+
+        # Keep track of the last node at each depth level
+        last_node_at_depth = {}
+
+        with open(file_path, 'r') as file:
+            reader = csv.reader(file)
+            for row in reader:
+                # Iterate over each cell in the row
+                for i in range(len(row)):
+                    node = row[i]
+
+                    # Skip empty cells
+                    if not node:
+                        continue
+
+                    parent = last_node_at_depth.get(i - 1)
+
+
+                    nodo = NodoArbol(nombre=node)
+                    db.session.add(nodo)
+                    db.session.commit()
+
+                    # If the node is not the root node, create a relationship with its parent
+                    if parent:
+                        parent_nodo = NodoArbol.query.filter_by(nombre=parent).first()
+                        relacion = RelacionesNodo(ascendente_id=parent_nodo.nodoID, descendente_id=nodo.nodoID)
+                        db.session.add(relacion)
+                        db.session.commit()
+
+                    # Update the last node at the current depth level
+                    last_node_at_depth[i] = node
